@@ -16,10 +16,17 @@ sentiment-driven-stock-prediction/
 │   ├── 01_eda_analysis.ipynb      # Comprehensive EDA notebook
 │   └── figures/                    # Generated visualizations
 ├── scripts/                        # Utility scripts
+│   ├── test_setup.py              # Environment verification
+│   └── trust_notebook.py          # Notebook trust utility
 ├── src/                           # Source code modules
+│   ├── data_loader.py             # Data loading and preprocessing
+│   ├── text_processor.py          # Text processing and NLP
+│   └── analyzer.py                # Statistical analysis classes
 ├── tests/                         # Unit tests
 └── requirements.txt               # Python dependencies
 ```
+
+For detailed structure information, see [PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md).
 
 ## Dataset
 
@@ -171,6 +178,44 @@ See `requirements.txt` for the complete list of dependencies. Key libraries incl
 - `main`: Main development branch
 - `task-1`: EDA analysis branch (current)
 
+## Code Organization
+
+The project follows a modular architecture with reusable components:
+
+### Source Modules (`src/`)
+
+- **`data_loader.py`**: 
+  - `DataLoader`: Efficient chunked loading of large CSV files
+  - `DataPreprocessor`: Date conversion and feature extraction
+
+- **`text_processor.py`**: 
+  - `TextPreprocessor`: Text cleaning and tokenization
+  - `KeywordExtractor`: Keyword and phrase extraction
+  - `NLTKDataManager`: NLTK data download management
+
+- **`analyzer.py`**: 
+  - `DescriptiveAnalyzer`: Statistical summaries
+  - `TimeSeriesAnalyzer`: Temporal pattern analysis
+  - `PublisherAnalyzer`: Publisher pattern analysis
+
+### Usage Example
+
+```python
+from src import DataLoader, DataPreprocessor, TextPreprocessor
+
+# Load data
+loader = DataLoader('data/raw_analyst_ratings.csv')
+df = loader.load_data()
+
+# Preprocess
+preprocessor = DataPreprocessor(df)
+df = preprocessor.convert_dates().extract_temporal_features().get_dataframe()
+
+# Process text
+text_processor = TextPreprocessor()
+df['processed_headline'] = text_processor.preprocess_series(df['headline'])
+```
+
 ## Technical Notes
 
 ### Data Processing
@@ -182,6 +227,31 @@ See `requirements.txt` for the complete list of dependencies. Key libraries incl
 - Text preprocessing uses tqdm for progress tracking (with fallback to standard apply)
 - Topic modeling uses a sample of 50,000 rows for computational efficiency
 - Visualizations are saved as high-resolution PNG files (300 DPI) and interactive HTML files
+
+### Code Quality
+- Code follows PEP 8 style guidelines
+- Comprehensive docstrings for all classes and functions
+- Linting configuration (`.flake8`, `pyproject.toml`) included
+- Unit tests structure in place (see `tests/`)
+
+## Development
+
+### Running Tests
+```bash
+pytest tests/
+```
+
+### Code Formatting
+```bash
+black src/ tests/
+isort src/ tests/
+flake8 src/ tests/
+```
+
+### Project Documentation
+- See [PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md) for detailed structure
+- See [CHANGELOG.md](CHANGELOG.md) for version history
+- See [MANIFEST.md](MANIFEST.md) for file listing
 
 ## Contributing
 
