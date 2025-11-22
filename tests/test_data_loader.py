@@ -2,6 +2,13 @@
 Unit tests for data_loader module.
 
 Tests for DataLoader and DataPreprocessor classes.
+
+This test suite verifies:
+- Data loading from CSV files (including chunked reading)
+- Date conversion and validation
+- Temporal feature extraction
+- Text feature calculation
+- Error handling for missing columns
 """
 
 import pytest
@@ -38,6 +45,18 @@ class TestDataLoader:
         assert len(loaded_df) == 3
         assert 'col1' in loaded_df.columns
         assert 'col2' in loaded_df.columns
+    
+    def test_load_data_file_not_found(self):
+        """Test that missing file raises FileNotFoundError."""
+        loader = DataLoader('nonexistent_file.csv')
+        with pytest.raises(FileNotFoundError):
+            loader.load_data(show_progress=False)
+    
+    def test_get_dataframe_before_load(self):
+        """Test that get_dataframe raises error if data not loaded."""
+        loader = DataLoader('dummy.csv')
+        with pytest.raises(ValueError, match="Data not loaded"):
+            loader.get_dataframe()
 
 
 class TestDataPreprocessor:
@@ -83,4 +102,29 @@ class TestDataPreprocessor:
         assert 'headline_length' in result_df.columns
         assert 'headline_word_count' in result_df.columns
         assert result_df['headline_length'].iloc[0] == 5
+    
+    def test_calculate_text_features_missing_column(self):
+        """Test that missing headline column raises ValueError."""
+        df = pd.DataFrame({'other_col': [1, 2, 3]})
+        preprocessor = DataPreprocessor(df)
+        with pytest.raises(ValueError, match="Headline column not found"):
+            preprocessor.calculate_text_features()
+    
+    def test_method_chaining(self):
+        """Test that preprocessing methods can be chained."""
+        df = pd.DataFrame({
+            'headline': ['Test headline'],
+            'date': ['2020-01-01']
+        })
+        
+        preprocessor = DataPreprocessor(df)
+        result_df = (preprocessor
+                    .convert_dates()
+                    .extract_temporal_features()
+                    .calculate_text_features()
+                    .get_dataframe())
+        
+        # Verify all features were created
+        assert 'year' in result_df.columns
+        assert 'headline_length' in result_df.columns
 
