@@ -273,7 +273,6 @@ See [COMMIT_GUIDELINES.md](docs/COMMIT_GUIDELINES.md) for detailed examples.
 ### Project Documentation
 - See [PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md) for detailed structure
 - See [CHANGELOG.md](CHANGELOG.md) for version history
-- See [MANIFEST.md](MANIFEST.md) for file listing
 
 ## Contributing
 

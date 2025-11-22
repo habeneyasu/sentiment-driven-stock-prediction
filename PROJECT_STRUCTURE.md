@@ -15,7 +15,6 @@ sentiment-driven-stock-prediction/
 │
 ├── notebooks/                # Jupyter notebooks
 │   ├── __init__.py          # Package initialization
-│   ├── README.md            # Notebook documentation
 │   ├── 01_eda_analysis.ipynb    # Main EDA notebook
 │   └── figures/             # Generated visualizations
 │       ├── headline_length_distributions.png
@@ -30,7 +29,6 @@ sentiment-driven-stock-prediction/
 │
 ├── scripts/                  # Utility scripts
 │   ├── __init__.py          # Package initialization
-│   ├── README.md            # Scripts documentation
 │   ├── test_setup.py        # Environment verification script
 │   └── trust_notebook.py    # Notebook trust script
 │
