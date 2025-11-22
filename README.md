@@ -198,22 +198,39 @@ The project follows a modular architecture with reusable components:
   - `TimeSeriesAnalyzer`: Temporal pattern analysis
   - `PublisherAnalyzer`: Publisher pattern analysis
 
+- **`sentiment_analyzer.py`**: 
+  - `SentimentAnalyzer`: VADER sentiment analysis for headlines
+  - `SentimentReturnLinker`: Links sentiment with stock returns for correlation analysis
+
+- **`technical_analyzer.py`**: 
+  - `TechnicalAnalyzer`: Technical indicators (SMA, EMA, RSI, MACD, Bollinger Bands)
+
 ### Usage Example
 
 ```python
-from src import DataLoader, DataPreprocessor, TextPreprocessor
+from src import (DataLoader, DataPreprocessor, TextPreprocessor,
+                SentimentAnalyzer, SentimentReturnLinker, TechnicalAnalyzer)
 
-# Load data
+# Load and preprocess data
 loader = DataLoader('data/raw_analyst_ratings.csv')
 df = loader.load_data()
 
-# Preprocess
 preprocessor = DataPreprocessor(df)
 df = preprocessor.convert_dates().extract_temporal_features().get_dataframe()
 
-# Process text
-text_processor = TextPreprocessor()
-df['processed_headline'] = text_processor.preprocess_series(df['headline'])
+# Analyze sentiment
+sentiment_analyzer = SentimentAnalyzer()
+sentiment_df = sentiment_analyzer.analyze_series(df['headline'])
+
+# Link sentiment with returns
+linker = SentimentReturnLinker()
+correlation = linker.calculate_sentiment_return_correlation(
+    sentiment_df['compound'], returns_series
+)
+
+# Technical analysis
+tech_analyzer = TechnicalAnalyzer()
+indicators = tech_analyzer.calculate_all_indicators(price_series)
 ```
 
 ## Technical Notes
@@ -238,7 +255,17 @@ df['processed_headline'] = text_processor.preprocess_series(df['headline'])
 
 ### Running Tests
 ```bash
+# Run all tests
 pytest tests/
+
+# Run with coverage
+pytest tests/ --cov=src --cov-report=html
+
+# Run specific test file
+pytest tests/test_data_loader.py
+
+# Run with verbose output
+pytest tests/ -v
 ```
 
 ### Code Formatting
