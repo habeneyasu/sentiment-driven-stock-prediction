@@ -11,6 +11,7 @@ plotly>=5.14.0
 nltk>=3.8.0
 spacy>=3.5.0
 scikit-learn>=1.3.0
+vaderSentiment>=3.3.2
 
 # Topic Modeling
 gensim>=4.3.0
@@ -18,6 +19,11 @@ wordcloud>=1.9.0
 
 # Time Series Analysis
 statsmodels>=0.14.0
+scipy>=1.10.0
+
+# Testing
+pytest>=7.4.0
+pytest-cov>=4.1.0
 
 # Jupyter
 jupyter>=1.0.0
