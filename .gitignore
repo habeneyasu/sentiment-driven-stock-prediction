@@ -1,0 +1,83 @@
+# Python + Data Science
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+venv/
+ENV/
+env/
+.venv
+
+# Jupyter Notebook
+.ipynb_checkpoints
+*.ipynb_checkpoints
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Data files (large datasets)
+*.csv
+*.parquet
+*.h5
+*.hdf5
+data/raw/
+data/processed/
+*.pkl
+*.pickle
+
+# Model files
+models/
+*.model
+*.joblib
+
+# Figures and outputs (optional - uncomment if you don't want to track generated figures)
+# notebooks/figures/
+# *.png
+# *.jpg
+# *.pdf
+# *.html
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Environment variables
+.env
+.env.local
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# MyPy
+.mypy_cache/
+.dmypy.json
+dmypy.json

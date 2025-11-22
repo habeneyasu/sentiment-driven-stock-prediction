@@ -1,0 +1,30 @@
+# Core Data Science Libraries
+pandas>=2.0.0
+numpy>=1.24.0
+
+# Visualization
+matplotlib>=3.7.0
+seaborn>=0.12.0
+plotly>=5.14.0
+
+# Natural Language Processing
+nltk>=3.8.0
+spacy>=3.5.0
+scikit-learn>=1.3.0
+
+# Topic Modeling
+gensim>=4.3.0
+wordcloud>=1.9.0
+
+# Time Series Analysis
+statsmodels>=0.14.0
+
+# Jupyter
+jupyter>=1.0.0
+ipykernel>=6.23.0
+
+# Utilities
+tqdm>=4.65.0
+python-dateutil>=2.8.0
+pytz>=2023.3
+
