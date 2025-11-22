@@ -99,6 +99,29 @@ The notebook will generate:
 - Visualizations saved in `notebooks/figures/`
 - Interactive Plotly charts
 
+### Troubleshooting
+
+**Notebook "Not Trusted" Warning:**
+If you see a warning that the notebook is not trusted, run:
+```bash
+python3 scripts/trust_notebook.py
+```
+
+**NLTK Data Issues:**
+If you encounter `BadZipFile` errors with NLTK, the notebook will automatically attempt to re-download corrupted data files. If issues persist, you can manually clear and re-download:
+```python
+import nltk
+nltk.download('punkt', force=True)
+nltk.download('stopwords', force=True)
+nltk.download('wordnet', force=True)
+```
+
+**WebSocket Errors:**
+If you see `tornado.websocket.WebSocketClosedError`, this is usually a temporary connection issue. Try:
+- Refreshing the browser
+- Restarting the Jupyter server
+- Checking your network connection
+
 ## Dependencies
 
 See `requirements.txt` for the complete list of dependencies. Key libraries include:
