@@ -248,6 +248,28 @@ isort src/ tests/
 flake8 src/ tests/
 ```
 
+### Contributing
+
+We welcome contributions! Please see our contributing guidelines:
+
+- **[CONTRIBUTING.md](.github/CONTRIBUTING.md)** - Complete contributing guide
+- **[COMMIT_GUIDELINES.md](docs/COMMIT_GUIDELINES.md)** - Commit message examples and best practices
+- **[Pull Request Template](.github/pull_request_template.md)** - PR template
+
+**Quick Start:**
+1. Create a feature branch: `git checkout -b feat/your-feature`
+2. Make small, focused commits (see commit guidelines)
+3. Push and create a Pull Request
+4. Address review feedback
+
+**Commit Guidelines:**
+- Use conventional commits: `feat(module): description`
+- Make small, focused commits
+- One logical change per commit
+- Write clear, descriptive messages
+
+See [COMMIT_GUIDELINES.md](docs/COMMIT_GUIDELINES.md) for detailed examples.
+
 ### Project Documentation
 - See [PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md) for detailed structure
 - See [CHANGELOG.md](CHANGELOG.md) for version history

@@ -1,0 +1,77 @@
+name: Pull Request Checks
+
+on:
+  pull_request:
+    branches: [ main, task-* ]
+
+jobs:
+  lint:
+    name: Code Linting
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install flake8 black isort
+      
+      - name: Run flake8
+        run: |
+          flake8 src/ tests/ --count --select=E9,F63,F7,F82 --show-source --statistics
+          flake8 src/ tests/ --count --exit-zero --max-complexity=10 --max-line-length=100 --statistics
+      
+      - name: Check code formatting with black
+        run: |
+          black --check src/ tests/
+      
+      - name: Check import sorting with isort
+        run: |
+          isort --check-only src/ tests/
+
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-cov
+      
+      - name: Run tests
+        run: |
+          pytest tests/ -v --cov=src --cov-report=term-missing
+
+  commit-message:
+    name: Check Commit Messages
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      
+      - name: Check commit message format
+        run: |
+          # Check that commit messages follow conventional commits
+          git log origin/main..HEAD --pretty=format:"%s" | while read msg; do
+            if ! echo "$msg" | grep -qE "^(feat|fix|docs|style|refactor|test|chore)(\(.+\))?:"; then
+              echo "❌ Invalid commit message: $msg"
+              echo "Commit messages must follow: <type>(<scope>): <subject>"
+              exit 1
+            fi
+          done
+          echo "✅ All commit messages follow conventional commits format"
+
