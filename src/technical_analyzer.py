@@ -3,21 +3,28 @@ Technical analysis module.
 
 This module provides technical analysis indicators for stock price data,
 including moving averages, RSI, MACD, and other common indicators.
-Uses pandas and numpy for calculations (TA-Lib alternative).
+Integrates TA-Lib for industry-standard technical indicator calculations.
 """
 
 import pandas as pd
 import numpy as np
 from typing import Optional, Tuple
 
+try:
+    import talib
+    TALIB_AVAILABLE = True
+except ImportError:
+    TALIB_AVAILABLE = False
+    talib = None
+
 
 class TechnicalAnalyzer:
     """
     A class for calculating technical analysis indicators.
     
-    Provides common technical indicators used in stock analysis without
-    requiring TA-Lib. All calculations use pandas and numpy for efficiency
-    and compatibility.
+    Provides common technical indicators used in stock analysis using TA-Lib
+    for industry-standard calculations. Falls back to pandas/numpy if TA-Lib
+    is not available.
     
     Example:
         >>> analyzer = TechnicalAnalyzer()
@@ -25,9 +32,19 @@ class TechnicalAnalyzer:
         >>> rsi = analyzer.rsi(prices, period=14)
     """
     
-    def __init__(self):
-        """Initialize the TechnicalAnalyzer."""
-        pass
+    def __init__(self, use_talib: bool = True):
+        """
+        Initialize the TechnicalAnalyzer.
+        
+        Args:
+            use_talib: If True and TA-Lib is available, use TA-Lib for calculations.
+                      Otherwise, use pandas/numpy fallback methods.
+        """
+        self.use_talib = use_talib and TALIB_AVAILABLE
+        if self.use_talib:
+            self._method_source = "TA-Lib"
+        else:
+            self._method_source = "pandas/numpy"
     
     def simple_moving_average(
         self, 
@@ -43,6 +60,8 @@ class TechnicalAnalyzer:
         - 50 days: Medium-term trend
         - 200 days: Long-term trend
         
+        Uses TA-Lib if available, otherwise falls back to pandas.
+        
         Args:
             prices: Series of closing prices
             window: Number of periods for moving average (default: 20)
@@ -54,7 +73,12 @@ class TechnicalAnalyzer:
             >>> analyzer = TechnicalAnalyzer()
             >>> sma_20 = analyzer.simple_moving_average(prices, window=20)
         """
-        return prices.rolling(window=window).mean()
+        if self.use_talib:
+            prices_array = prices.values.astype(float)
+            sma_array = talib.SMA(prices_array, timeperiod=window)
+            return pd.Series(sma_array, index=prices.index)
+        else:
+            return prices.rolling(window=window).mean()
     
     def exponential_moving_average(
         self,
@@ -68,10 +92,13 @@ class TechnicalAnalyzer:
         EMA gives more weight to recent prices, making it more responsive
         to recent price changes than SMA. Useful for trend-following strategies.
         
+        Uses TA-Lib if available, otherwise falls back to pandas.
+        
         Args:
             prices: Series of closing prices
             span: Span parameter for EMA (default: 20)
             alpha: Smoothing factor (0 < alpha <= 1). If None, uses 2/(span+1)
+                   Note: alpha is ignored when using TA-Lib
             
         Returns:
             pd.Series: EMA values
@@ -80,9 +107,14 @@ class TechnicalAnalyzer:
             >>> analyzer = TechnicalAnalyzer()
             >>> ema_12 = analyzer.exponential_moving_average(prices, span=12)
         """
-        if alpha is None:
-            alpha = 2.0 / (span + 1.0)
-        return prices.ewm(alpha=alpha, adjust=False).mean()
+        if self.use_talib:
+            prices_array = prices.values.astype(float)
+            ema_array = talib.EMA(prices_array, timeperiod=span)
+            return pd.Series(ema_array, index=prices.index)
+        else:
+            if alpha is None:
+                alpha = 2.0 / (span + 1.0)
+            return prices.ewm(alpha=alpha, adjust=False).mean()
     
     def rsi(
         self,
@@ -94,6 +126,8 @@ class TechnicalAnalyzer:
         
         RSI measures momentum and identifies overbought (>70) or oversold (<30)
         conditions. Values range from 0 to 100.
+        
+        Uses TA-Lib if available, otherwise falls back to pandas calculation.
         
         Args:
             prices: Series of closing prices
@@ -107,22 +141,27 @@ class TechnicalAnalyzer:
             >>> rsi_14 = analyzer.rsi(prices, period=14)
             >>> # RSI > 70: overbought, RSI < 30: oversold
         """
-        # Calculate price changes
-        delta = prices.diff()
-        
-        # Separate gains and losses
-        gains = delta.where(delta > 0, 0)
-        losses = -delta.where(delta < 0, 0)
-        
-        # Calculate average gains and losses using exponential moving average
-        avg_gains = gains.ewm(span=period, adjust=False).mean()
-        avg_losses = losses.ewm(span=period, adjust=False).mean()
-        
-        # Calculate RS (Relative Strength) and RSI
-        rs = avg_gains / avg_losses
-        rsi = 100 - (100 / (1 + rs))
-        
-        return rsi
+        if self.use_talib:
+            prices_array = prices.values.astype(float)
+            rsi_array = talib.RSI(prices_array, timeperiod=period)
+            return pd.Series(rsi_array, index=prices.index)
+        else:
+            # Calculate price changes
+            delta = prices.diff()
+            
+            # Separate gains and losses
+            gains = delta.where(delta > 0, 0)
+            losses = -delta.where(delta < 0, 0)
+            
+            # Calculate average gains and losses using exponential moving average
+            avg_gains = gains.ewm(span=period, adjust=False).mean()
+            avg_losses = losses.ewm(span=period, adjust=False).mean()
+            
+            # Calculate RS (Relative Strength) and RSI
+            rs = avg_gains / avg_losses
+            rsi = 100 - (100 / (1 + rs))
+            
+            return rsi
     
     def macd(
         self,
@@ -138,6 +177,8 @@ class TechnicalAnalyzer:
         - MACD line: Difference between fast and slow EMA
         - Signal line: EMA of MACD line
         - Histogram: Difference between MACD and signal line
+        
+        Uses TA-Lib if available, otherwise falls back to pandas calculation.
         
         Args:
             prices: Series of closing prices
@@ -156,24 +197,38 @@ class TechnicalAnalyzer:
             >>> macd_df = analyzer.macd(prices)
             >>> # Buy signal when MACD crosses above signal line
         """
-        # Calculate fast and slow EMAs
-        ema_fast = self.exponential_moving_average(prices, span=fast_period)
-        ema_slow = self.exponential_moving_average(prices, span=slow_period)
-        
-        # MACD line is difference between fast and slow EMA
-        macd_line = ema_fast - ema_slow
-        
-        # Signal line is EMA of MACD line
-        signal_line = self.exponential_moving_average(macd_line, span=signal_period)
-        
-        # Histogram is difference between MACD and signal
-        histogram = macd_line - signal_line
-        
-        return pd.DataFrame({
-            'macd': macd_line,
-            'signal': signal_line,
-            'histogram': histogram
-        })
+        if self.use_talib:
+            prices_array = prices.values.astype(float)
+            macd_line, signal_line, histogram = talib.MACD(
+                prices_array,
+                fastperiod=fast_period,
+                slowperiod=slow_period,
+                signalperiod=signal_period
+            )
+            return pd.DataFrame({
+                'macd': pd.Series(macd_line, index=prices.index),
+                'signal': pd.Series(signal_line, index=prices.index),
+                'histogram': pd.Series(histogram, index=prices.index)
+            })
+        else:
+            # Calculate fast and slow EMAs
+            ema_fast = self.exponential_moving_average(prices, span=fast_period)
+            ema_slow = self.exponential_moving_average(prices, span=slow_period)
+            
+            # MACD line is difference between fast and slow EMA
+            macd_line = ema_fast - ema_slow
+            
+            # Signal line is EMA of MACD line
+            signal_line = self.exponential_moving_average(macd_line, span=signal_period)
+            
+            # Histogram is difference between MACD and signal
+            histogram = macd_line - signal_line
+            
+            return pd.DataFrame({
+                'macd': macd_line,
+                'signal': signal_line,
+                'histogram': histogram
+            })
     
     def bollinger_bands(
         self,

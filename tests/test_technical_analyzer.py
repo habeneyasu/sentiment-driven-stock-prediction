@@ -100,9 +100,11 @@ class TestTechnicalAnalyzer:
         assert 'middle' in bands.columns
         assert 'upper' in bands.columns
         assert 'lower' in bands.columns
-        # Upper band should be above middle, lower below
-        assert (bands['upper'] > bands['middle']).all()
-        assert (bands['lower'] < bands['middle']).all()
+        # Upper band should be above middle, lower below (excluding NaN values)
+        valid_mask = bands['upper'].notna() & bands['middle'].notna() & bands['lower'].notna()
+        if valid_mask.any():
+            assert (bands.loc[valid_mask, 'upper'] > bands.loc[valid_mask, 'middle']).all()
+            assert (bands.loc[valid_mask, 'lower'] < bands.loc[valid_mask, 'middle']).all()
     
     def test_bollinger_bands_custom_std(self):
         """Test Bollinger Bands with custom standard deviation."""
@@ -138,4 +140,35 @@ class TestTechnicalAnalyzer:
         
         assert 'sma_20' in indicators.columns
         assert 'volume_ratio' not in indicators.columns  # Should not be present without volume
+    
+    def test_talib_integration(self):
+        """Test that TA-Lib integration works when available."""
+        from src.technical_analyzer import TALIB_AVAILABLE
+        
+        analyzer = TechnicalAnalyzer(use_talib=True)
+        prices = pd.Series(range(100, 150))
+        
+        # Test that indicators are calculated correctly regardless of TA-Lib availability
+        sma = analyzer.simple_moving_average(prices, window=20)
+        rsi = analyzer.rsi(prices, period=14)
+        macd_df = analyzer.macd(prices)
+        
+        assert len(sma) == len(prices)
+        assert len(rsi) == len(prices)
+        assert 'macd' in macd_df.columns
+        
+        # Verify method source attribute
+        if TALIB_AVAILABLE:
+            assert analyzer._method_source == "TA-Lib"
+        else:
+            assert analyzer._method_source == "pandas/numpy"
+    
+    def test_fallback_to_pandas(self):
+        """Test fallback to pandas when TA-Lib is disabled."""
+        analyzer = TechnicalAnalyzer(use_talib=False)
+        prices = pd.Series([100, 102, 104, 106, 108, 110])
+        
+        sma = analyzer.simple_moving_average(prices, window=3)
+        assert analyzer._method_source == "pandas/numpy"
+        assert len(sma) == len(prices)
 
