@@ -21,7 +21,7 @@ class TestTechnicalVisualizer:
         np.random.seed(42)
         
         base_price = 100
-        prices = base_price + np.cumsum(np.random.randn(50) * 2)
+        prices = pd.Series(base_price + np.cumsum(np.random.randn(50) * 2), index=dates)
         
         df = pd.DataFrame({
             'Open': prices + np.random.randn(50) * 0.5,
@@ -31,10 +31,10 @@ class TestTechnicalVisualizer:
             'Volume': np.random.randint(1000000, 5000000, 50),
             'SMA_20': prices.rolling(20).mean(),
             'EMA_12': prices.ewm(span=12).mean(),
-            'RSI': pd.Series([50] * 50),  # Mock RSI
-            'MACD': pd.Series([0] * 50),  # Mock MACD
-            'macd_signal': pd.Series([0] * 50),
-            'macd_histogram': pd.Series([0] * 50)
+            'RSI': pd.Series([50] * 50, index=dates),  # Mock RSI
+            'MACD': pd.Series([0] * 50, index=dates),  # Mock MACD
+            'macd_signal': pd.Series([0] * 50, index=dates),
+            'macd_histogram': pd.Series([0] * 50, index=dates)
         }, index=dates)
         
         return df
